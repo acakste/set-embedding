@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "ml-pipeline-vertex-ai-template"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+packages = [{include = "training"}]
+
+[tool.poetry.dependencies]
+python = "~3.10"
+google-auth = "2.28.0"
+google-cloud-storage = "==1.44.0"
+google-cloud-bigquery = "==2.34.1"
+pandas = "==2.0.3"
+pyyaml = "==6.0.1"
+pyarrow = "==15.0.0"
+google-cloud-aiplatform = "==1.28.0"
+db-dtypes = "^1.2.0"
+xgboost = "^2.0.3"
+scikit-learn = "^1.4.1.post1"
+
+matplotlib = "3.8.3"
+pykeops = "2.2.2"
+tqdm = "4.62.3"
+geomloss = "0.2.3"
+
+# For UMAP plotting
+datashader = "0.13.0"
+bokeh = "2.4.0"
+holoviews = "1.14.3"
+scikit-image = "0.19.0"
+colorcet = "2.0.6"
+
+# For torch, try to get with CUDA
+#torch = "2.2.0"
+#torch = { version = "2.2.0+cu118", source = "pytorch" }
+#
+#[[tool.poetry.source]]
+#name = "pytorch"
+#url = "https://download.pytorch.org/whl/cu118"
+#default = false
+#secondary = true
+#priority = "explicit"
+
+#[[tool.poetry.source]]
+#name = "PyPi"
+#priority = "default"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
