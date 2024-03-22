@@ -1,0 +1,17 @@
+config:
+  bigquery:
+#    project: syb-production-ai
+#    training_dataset: hits_detection_hackdays_2024
+#    training_table: hits_non_hits_seed_table
+    project: syb-production-ai
+    training_dataset: anton_thesis
+    training_table: user_playback_small_dataset_v0
+    groupby_str: account_id # account_id/playlist_id atm
+  file:
+    from_file: !!bool False
+    file_name: None
+
+gcs_bucket:
+  project: syb-production-ai
+  bucket: syb-production-ai-test-clem
+

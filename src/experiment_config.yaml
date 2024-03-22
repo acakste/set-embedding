@@ -1,0 +1,64 @@
+name: test-experiment
+partition_date: "2024-02-01"
+
+
+model_type: ParamEstimator # DeepSet #SetTransformer #ParamEstimator #
+gcs_path: models
+from_file: !!bool False
+
+
+# Training Parameters
+n_epochs: !!int 5
+objective: MinDistortion
+batch_size: !!int 1
+
+
+
+# Comparison
+
+
+# Distortion Based Training
+MinDistortion:
+  distortion_func: fn_quadratic
+  reduction: mean
+  add_noise: !!bool True
+  sample_func: sample_one
+  reference_set: training_set
+  sample_size: 10 # Number of other instances
+  max_num_tracks: 1000 # Max number of tracks to use in the distance metric
+
+
+# XGBoost parameters
+XGBoost:
+  scale_pos_weight: 1
+  test: 3
+
+# SetTransformer parameters
+SetTransformer:
+  input_dim: 141
+  output_dim: !!int 256
+  hidden_dim: !!int 128
+  num_heads: !!int  8
+  num_inds: !!int   30
+  num_seeds: !!int  1
+  num_enc_layers: !!int 2
+  num_dec_layers: !!int 2
+  use_ISAB: !!bool True
+
+# ParamEstimator parameters
+ParamEstimator:
+  input_dim: !!int 141
+  embedding_dim: !!int 128
+  num_components: !!int 2
+  hidden_dim: !!int 64
+
+DeepSet:
+  input_dim: !!int 141
+  output_dim: !!int 128
+  hidden_dim=: !!int 0 # Typo
+  hidden_dim: !!int 128
+  pooling_op: !!str mean #mean/sum/max
+  num_enc_layers: !!int 2
+  num_dec_layers: !!int 2
+  hidden_activation: !!str relu
+  output_activation: !!str relu
