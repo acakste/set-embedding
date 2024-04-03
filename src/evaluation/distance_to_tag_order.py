@@ -5,6 +5,7 @@ import torch
 from src.other.nearest_neighbors import get_n_neighbors
 
 
+
 def jaccard_index(tags1, tags2):
     """ Jaccard index for tag set similarity. Done only by string matching.
     :param tags1: A list of tags, as strings.
@@ -14,6 +15,31 @@ def jaccard_index(tags1, tags2):
     intersection = len(set(tags1).intersection(tags2))
     union = len(set(tags1).union(tags2))
     return intersection / union
+
+def ruzicka_index(tags1, weight1, tags2, weight2):
+    """ Ruzicka index.
+    :tags1: A list of tags, as strings.
+    :weight1: A list of weights, as floats, with the order as tags1.
+    :tags2: A list of tags, as strings.
+    :weight2: A list of weights, as floats, with the order as tags2.
+    """
+
+    # Define one hot vectors, with the length of the union of tags1 and tags2
+    union = list(set(tags1).union(tags2))
+
+    vec_1 = torch.zeros(size=(len(union),))
+    for i in range(len(tags1)):
+        j = union.index(tags1[i])
+        vec_1[j] = weight1[i]
+
+    vec_2 = torch.zeros(size=(len(union),))
+    for i in range(len(tags2)):
+        j = union.index(tags2[i])
+        vec_2[j] = weight2[i]
+
+
+    ruzicka_ind = torch.min(vec_1, vec_2).sum() / torch.max(vec_1, vec_2).sum()
+    return float(ruzicka_ind)
 
 
 """ From one list of tags, to a df with tags"""
@@ -28,7 +54,10 @@ def tags_to_df_similarity(tags, df, tag_type, groupby_str="playlist_id", type_co
     :return:
     """
     # Find the df with only the relevant tags wrt to the tag_type
-    df = df[df[type_column_name] == tag_type]
+    if type_column_name != None:
+        df = df[df[type_column_name] == tag_type]
+    else:
+        tag_type = ""
 
     # For each row in the df, calculate the jaccard index with the tags found under tag_column_name and the list tags.
 
@@ -41,6 +70,29 @@ def tags_to_df_similarity(tags, df, tag_type, groupby_str="playlist_id", type_co
 
     # Return a list of labels and the values of the jaccard index.
     return result[f"jaccard_index_{tag_type}"].to_list(), result[groupby_str].to_list()
+
+
+
+def tags_to_df_similarity_weighted(tags, weight, df, tag_type, groupby_str="playlist_id", type_column_name="category", tag_column_name="tags", weight_column_name="tag_score"):
+
+    # Find the df with only the relevant tags wrt to the tag_type
+    if type_column_name != None:
+        df = df[df[type_column_name] == tag_type]
+    else:
+        tag_type = ""
+
+    # For each row in the df, calculate the ruzicka index with the tags found under tag_column_name and the list tags.
+
+    result = df.apply(lambda row: ruzicka_index(tags, weight, row[tag_column_name], row[weight_column_name]), axis=1)
+
+    # join with the groupby_str
+    result = pd.concat([df[groupby_str], result, df[tag_column_name], df[weight_column_name]], axis=1)
+
+    # rename the column with the jaccard index
+    result.rename(columns={0: f"ruzicka_index_{tag_type}"}, inplace=True)
+
+    # Return a list of labels and the values of the jaccard index.
+    return result[f"ruzicka_index_{tag_type}"].to_list(), result[groupby_str].to_list()
 
 
 def p2p_embedding_tags_similarity(start_embedding, start_label, tags, embeddings, labels, df_tags, tag_type):
@@ -124,6 +176,7 @@ def main():
     """ Load the playlist tags. """
     df_tags = pd.read_json("../../data/top_readymades_airtable_tags.json")
     id_name_dict = get_readymade_names()
+
 
     #------------------------------------------------
     """ Load the user embeddings. """
